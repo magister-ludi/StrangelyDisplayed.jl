@@ -4,11 +4,12 @@ function drawProgram(p::Program)
     steps = getSteps(p)
     ns = length(steps)
 
-    ww = (ns + 5) * (BASE_W + GAP)
-    hh = (nq + 2) * (BASE_H + GAP)
-    #img = fill(BACKGROUND, ww, hh)
+    ww = (ns + 5) * (BLOCK_PIXELS + GAP_PIXELS)
+    hh = (nq + 2) * (BLOCK_PIXELS + GAP_PIXELS)
     rdr = Renderer(p, ww, hh)
-    rdr.hMin, rdr.hMax, rdr.vMin, rdr.vMax = GAP, ww - GAP, GAP, hh - GAP
+
+    rdr.hMin, rdr.hMax, rdr.vMin, rdr.vMax =
+        GAP_PIXELS, ww - GAP_PIXELS, GAP_PIXELS, hh - GAP_PIXELS
     set_plot_range(rdr, 0, ns + 2, 0, nq + 1)
 
     set_source_rgb(rdr.ctx, 0, 0, 0)
@@ -36,7 +37,7 @@ function drawProgram(p::Program)
         probBox(rdr, ns + 1, q, getProbability(qubit))
     end
 
-    return permutedims(rdr.img)
+    return RGB{N0f8}.(permutedims(rdr.img))
 end
 
 function wires(rdr::Renderer)
@@ -51,7 +52,7 @@ end
 function drawblock(rdr::Renderer, x, y, caption)
     set_font_size(rdr.ctx, 20)
     set_source_rgb(rdr.ctx, 0.4, 0.4, 1)
-    plotrectangle(rdr, x - rdr.basew / 2, y - rdr.baseh / 2, rdr.basew, rdr.baseh, true)
+    plotrectangle(rdr, x - rdr.base_w / 2, y - rdr.base_h / 2, rdr.base_w, rdr.base_h, true)
     set_source_rgb(rdr.ctx, 1, 1, 1)
     plottext(rdr, x, y, caption)
 end
@@ -85,7 +86,7 @@ end
 
 function draw(rdr::Renderer, step, gate::Measurement)
     set_source_rgb(rdr.ctx, 0.5, 0.5, 0.5)
-    q = getMainQubitIndex(gate) + rdr.baseh / 4
+    q = getMainQubitIndex(gate) + rdr.base_h / 4
     l = length(getSteps(rdr.p))
     plotline(rdr, step, q, l + 1, q)
     drawblock(rdr, step, getMainQubitIndex(gate), getCaption(gate))
@@ -102,12 +103,12 @@ function probBox(rdr::Renderer, x, y, prob)
     select_font_face(rdr.ctx, "Sans", Cairo.FONT_SLANT_NORMAL, Cairo.FONT_WEIGHT_BOLD)
 
     set_source_rgb(rdr.ctx, 0.75, 0.75, 0.75)
-    plotrectangle(rdr, x - rdr.basew / 2, y - rdr.baseh / 2, rdr.basew, rdr.baseh, true)
+    plotrectangle(rdr, x - rdr.base_w / 2, y - rdr.base_h / 2, rdr.base_w, rdr.base_h, true)
     pct = prob * 100
     if pct ≥ 1
         set_source_rgb(rdr.ctx, 0.5, 0.5, 0.5)
-        h = rdr.baseh * prob
-        plotrectangle(rdr, x - rdr.basew / 2, y + rdr.baseh / 2, rdr.basew, -h, true)
+        h = rdr.base_h * prob
+        plotrectangle(rdr, x - rdr.base_w / 2, y + rdr.base_h / 2, rdr.base_w, -h, true)
     end
     set_source_rgb(rdr.ctx, 1, 1, 1)
     if pct < 1

@@ -2,9 +2,8 @@
 @enum HorAlign LeftAlign CentreHor RightAlign
 @enum VerAlign BottomAlign CentreVer TopAlign
 
-const BASE_W = 40
-const BASE_H = 40
-const GAP = 10
+const BLOCK_PIXELS = 40
+const GAP_PIXELS = 10
 const BACKGROUND = ARGB32(1, 1, 0.9)
 
 mutable struct Renderer
@@ -15,7 +14,7 @@ mutable struct Renderer
     ts::Float64
     tjh::HorAlign
     tjv::VerAlign
-    # plot area (image coords)
+    # plot area (pixel coords)
     hMin::Int
     hMax::Int
     vMin::Int
@@ -25,11 +24,11 @@ mutable struct Renderer
     xMax::Float64
     yMin::Float64
     yMax::Float64
-    # World values for BASE/GAP
-    basew::Float64
-    baseh::Float64
-    gapw::Float64
-    gaph::Float64
+    # World values for BASE/GAP_PIXELS
+    base_w::Float64
+    base_h::Float64
+    gap_w::Float64
+    gap_h::Float64
     function Renderer(p, ww, hh)
         img = fill(BACKGROUND, ww, hh)
         surf = CairoImageSurface(img)
@@ -44,7 +43,6 @@ mutable struct Renderer
         set_plot_area(rdr, 0.1, 0.9, 0.1, 0.9)
         select_font_face(rdr.ctx, "Sans", Cairo.FONT_SLANT_NORMAL, Cairo.FONT_WEIGHT_NORMAL)
         set_font_size(rdr.ctx, 12)
-        #set_antialias(rdr.ctx, true)
         return rdr
     end
 end
@@ -84,8 +82,9 @@ function set_plot_range(rdr::Renderer, x0, x1, y0, y1)
 end
 
 function set_world_values(rdr::Renderer)
-    rdr.basew, rdr.baseh = pixel_to_world(rdr, BASE_W, BASE_H) .- pixel_to_world(rdr, 0, 0)
-    rdr.gapw, rdr.gaph = pixel_to_world(rdr, GAP, GAP) .- pixel_to_world(rdr, 0, 0)
+    rdr.base_w, rdr.base_h =
+        pixel_to_world(rdr, BLOCK_PIXELS, BLOCK_PIXELS) .- pixel_to_world(rdr, 0, 0)
+    rdr.gap_w, rdr.gap_h = pixel_to_world(rdr, GAP_PIXELS, GAP_PIXELS) .- pixel_to_world(rdr, 0, 0)
 end
 
 """Return the drawing position of plot coordinates `x`, `y`."""

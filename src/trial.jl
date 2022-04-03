@@ -26,7 +26,7 @@ function drawTrialHistogram(p::Program, ntrials::Integer)
         qubits = getQubits(result)
         counts[1 + toNumber(qubits)] += 1
     end
-    ww = nvals * (BASE_W + 2 * GAP) + 2 * GAP
+    ww = nvals * (BLOCK_PIXELS + 2 * GAP_PIXELS) + 2 * GAP_PIXELS
     hh = round(Int, 2 * ww / 3)
     rdr = Renderer(p, ww, hh)
     ymax = 10 * ceil(Int, (maximum(counts) * 0.11))
@@ -46,7 +46,7 @@ function drawTrialHistogram(p::Program, ntrials::Integer)
     set_text_align(rdr, RightAlign, CentreVer)
     set_line_width(rdr.ctx, 0.2)
     if v > 5
-        for yy = 0:(v÷5):ymax
+        for yy = 0:(v ÷ 5):ymax
             x, y = world_to_pixel(rdr, rdr.xMin, yy)
             set_source_rgb(rdr.ctx, 0.2, 0.2, 0.2)
             drawline(rdr, rdr.hMin, y, rdr.hMax, y)
@@ -61,7 +61,7 @@ function drawTrialHistogram(p::Program, ntrials::Integer)
         set_source_rgb(rdr.ctx, 0.5, 0.5, 0.5)
         drawline(rdr, rdr.hMin, y, rdr.hMax, y)
     end
-    x, y = world_to_pixel(rdr, 0, ymax/2)
+    x, y = world_to_pixel(rdr, 0, ymax / 2)
 
     set_source_rgb(rdr.ctx, 0, 0, 0)
     set_text_align(rdr, CentreHor, CentreVer)
@@ -76,13 +76,13 @@ function drawTrialHistogram(p::Program, ntrials::Integer)
     labels = makelabels(nq)
     for i = 1:nvals
         set_source_rgb(rdr.ctx, 1, 0.5, 0)
-        plotrectangle(rdr, i - rdr.basew / 2, 0, rdr.basew, counts[i], true)
+        plotrectangle(rdr, i - rdr.base_w / 2, 0, rdr.base_w, counts[i], true)
         set_source_rgb(rdr.ctx, 0, 0, 0)
-        plotrectangle(rdr, i - rdr.basew / 2, 0, rdr.basew, counts[i])
+        plotrectangle(rdr, i - rdr.base_w / 2, 0, rdr.base_w, counts[i])
         x, y = world_to_pixel(rdr, i, 0)
         drawtext(rdr, x, y + 15, labels[i])
     end
-    return permutedims(rdr.img)
+    return RGB{N0f8}.(permutedims(rdr.img))
 end
 
 const types = [(8, UInt8), (16, UInt16), (32, UInt32), (64, UInt64), (128, UInt128), (Inf, BigInt)]
