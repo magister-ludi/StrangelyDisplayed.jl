@@ -6,10 +6,9 @@ function drawProgram(p::Program)
 
     ww = (ns + 5) * (BLOCK_PIXELS + GAP_PIXELS)
     hh = (nq + 2) * (BLOCK_PIXELS + GAP_PIXELS)
-    rdr = Renderer(p, ww, hh)
+    rdr = Renderer(ww, hh)
 
-    rdr.hMin, rdr.hMax, rdr.vMin, rdr.vMax =
-        GAP_PIXELS, ww - GAP_PIXELS, GAP_PIXELS, hh - GAP_PIXELS
+    set_plot_area(rdr, GAP_PIXELS, ww - GAP_PIXELS, hh - GAP_PIXELS, GAP_PIXELS)
     set_plot_range(rdr, 0, ns + 2, 0, nq + 1)
 
     set_source_rgb(rdr.ctx, 0, 0, 0)
@@ -20,12 +19,12 @@ function drawProgram(p::Program)
         plottext(rdr, 0, q, "q[", q, "]|0>")
     end
 
-    wires(rdr)
+    wires(rdr, nq, ns)
 
     set_text_align(rdr, CentreHor, CentreVer)
     for (s, step) in enumerate(steps)
         for gate in getGates(step)
-            draw(rdr, s, gate)
+            draw(rdr, s, ns, gate)
         end
     end
 
@@ -40,12 +39,10 @@ function drawProgram(p::Program)
     return RGB{N0f8}.(permutedims(rdr.img))
 end
 
-function wires(rdr::Renderer)
+function wires(rdr::Renderer, numQubits, numSteps)
     set_source_rgb(rdr.ctx, 0.2, 0.2, 0.2)
-    nq = getNumberQubits(rdr.p)
-    l = length(getSteps(rdr.p))
-    for q = 1:nq
-        plotline(rdr, 1, q, l + 1, q)
+    for q = 1:numQubits
+        plotline(rdr, 1, q, numSteps + 1, q)
     end
 end
 
@@ -57,13 +54,13 @@ function drawblock(rdr::Renderer, x, y, caption)
     plottext(rdr, x, y, caption)
 end
 
-function draw(rdr::Renderer, step, gate::Gate)
+function draw(rdr::Renderer, step, num_steps, gate::Gate)
     drawblock(rdr, step, getMainQubitIndex(gate), getCaption(gate))
 end
 
 draw(::Renderer, step, ::Identity) = nothing
 
-function draw(rdr::Renderer, step, gate::Cnot)
+function draw(rdr::Renderer, step, num_steps, gate::Cnot)
     i1 = getMainQubitIndex(gate)
     i2 = getSecondQubitIndex(gate)
     set_source_rgb(rdr.ctx, 0.5, 0.5, 0.5)
@@ -74,7 +71,7 @@ function draw(rdr::Renderer, step, gate::Cnot)
     drawcircle(rdr, x, y, 6)
 end
 
-function draw(rdr::Renderer, step, gate::Cz)
+function draw(rdr::Renderer, step, num_steps, gate::Cz)
     i1 = getMainQubitIndex(gate)
     i2 = getSecondQubitIndex(gate)
     set_source_rgb(rdr.ctx, 0.5, 0.5, 0.5)
@@ -84,19 +81,18 @@ function draw(rdr::Renderer, step, gate::Cz)
     drawblock(rdr, step, i2, "Z")
 end
 
-function draw(rdr::Renderer, step, gate::Measurement)
+function draw(rdr::Renderer, step, num_steps, gate::Measurement)
     set_source_rgb(rdr.ctx, 0.5, 0.5, 0.5)
     q = getMainQubitIndex(gate) + rdr.base_h / 4
-    l = length(getSteps(rdr.p))
-    plotline(rdr, step, q, l + 1, q)
+    plotline(rdr, step, q, num_steps + 1, q)
     drawblock(rdr, step, getMainQubitIndex(gate), getCaption(gate))
 end
 
 # TODO:
-#function draw(rdr::Renderer, step, gate::Toffoli)
-#function draw(rdr::Renderer, step, gate::AbstractBlockGate)
-#function draw(rdr::Renderer, step, gate::Oracle)
-#function draw(rdr::Renderer, step, gate::ProbabilitiesGate)
+#function draw(rdr::Renderer, step, num_steps, gate::Toffoli)
+#function draw(rdr::Renderer, step, num_steps, gate::AbstractBlockGate)
+#function draw(rdr::Renderer, step, num_steps, gate::Oracle)
+#function draw(rdr::Renderer, step, num_steps, gate::ProbabilitiesGate)
 
 function probBox(rdr::Renderer, x, y, prob)
     set_font_size(rdr.ctx, 11)

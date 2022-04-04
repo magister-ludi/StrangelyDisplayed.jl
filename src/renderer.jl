@@ -9,7 +9,6 @@ const BACKGROUND = ARGB32(1, 1, 0.9)
 mutable struct Renderer
     ctx::CairoContext
     img::Matrix{ARGB32}
-    p::Program
     tc::Float64
     ts::Float64
     tjh::HorAlign
@@ -29,11 +28,11 @@ mutable struct Renderer
     base_h::Float64
     gap_w::Float64
     gap_h::Float64
-    function Renderer(p, ww, hh)
+    function Renderer(ww, hh)
         img = fill(BACKGROUND, ww, hh)
         surf = CairoImageSurface(img)
         ctx = CairoContext(surf)
-        rdr = new(ctx, img, p)
+        rdr = new(ctx, img)
         set_text_angle(rdr, 0)
         set_plot_range(rdr, -1, 1, -1, 1)
         set_text_align(rdr, LeftAlign, BottomAlign)
@@ -66,10 +65,10 @@ end
 textextent(rdr::Renderer, s::AbstractString) = TextExtent(text_extents(rdr.ctx, s))
 
 function set_plot_area(rdr::Renderer, x0, x1, y0, y1)
-    rdr.hMin = round(Int, x0 * width(rdr.ctx))
-    rdr.hMax = round(Int, x1 * width(rdr.ctx))
-    rdr.vMax = round(Int, (1 - y1) * height(rdr.ctx))
-    rdr.vMin = round(Int, (1 - y0) * height(rdr.ctx))
+    rdr.hMin = round(Int, x0)
+    rdr.hMax = round(Int, x1)
+    rdr.vMin = round(Int, height(rdr.ctx) - y0)
+    rdr.vMax = round(Int, height(rdr.ctx) - y1)
     set_world_values(rdr)
 end
 

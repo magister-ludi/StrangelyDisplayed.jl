@@ -4,7 +4,7 @@ using Cairo
 using ImageCore
 using StrangelyQuantum
 
-export drawProgram, drawTrialHistogram
+export drawProgram, drawTrialHistogram, drawHistogram
 
 include("renderer.jl")
 include("diagram.jl")
