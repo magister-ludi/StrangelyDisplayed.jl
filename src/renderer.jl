@@ -7,6 +7,7 @@ const GAP_PIXELS = 10
 const BACKGROUND = ARGB32(1, 1, 0.9)
 
 mutable struct Renderer
+    p::Union{Nothing, Program}
     ctx::CairoContext
     img::Matrix{ARGB32}
     tc::Float64
@@ -28,11 +29,11 @@ mutable struct Renderer
     base_h::Float64
     gap_w::Float64
     gap_h::Float64
-    function Renderer(ww, hh)
+    function Renderer(p, ww, hh)
         img = fill(BACKGROUND, ww, hh)
         surf = CairoImageSurface(img)
         ctx = CairoContext(surf)
-        rdr = new(ctx, img)
+        rdr = new(p, ctx, img)
         set_text_angle(rdr, 0)
         set_plot_range(rdr, -1, 1, -1, 1)
         set_text_align(rdr, LeftAlign, BottomAlign)
@@ -45,6 +46,8 @@ mutable struct Renderer
         return rdr
     end
 end
+
+Renderer(ww, hh) = Renderer(nothing, ww, hh)
 
 struct TextExtent
     x_bearing::Float64
