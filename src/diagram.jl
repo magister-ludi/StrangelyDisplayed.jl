@@ -57,45 +57,6 @@ function drawblock(rdr::Renderer, x, y, caption)
     select_font_face(rdr.ctx, "Sans", Cairo.FONT_SLANT_NORMAL, Cairo.FONT_WEIGHT_NORMAL)
 end
 
-function draw(rdr::Renderer, step, num_steps, gate::Gate)
-    drawblock(rdr, step, getMainQubitIndex(gate), getCaption(gate))
-end
-
-draw(::Renderer, step, ::Identity) = nothing
-
-function draw(rdr::Renderer, step, num_steps, gate::Cnot)
-    i1 = getMainQubitIndex(gate)
-    i2 = getSecondQubitIndex(gate)
-    set_source_rgb(rdr.ctx, 0.5, 0.5, 0.5)
-    plotline(rdr, step, i1, step, i2)
-    x, y = world_to_pixel(rdr, step, i1)
-    drawcircle(rdr, x, y, 2.5, true)
-    x, y = world_to_pixel(rdr, step, i2)
-    drawcircle(rdr, x, y, 6)
-end
-
-function draw(rdr::Renderer, step, num_steps, gate::Cz)
-    i1 = getMainQubitIndex(gate)
-    i2 = getSecondQubitIndex(gate)
-    set_source_rgb(rdr.ctx, 0.5, 0.5, 0.5)
-    plotline(rdr, step, i1, step, i2)
-    x, y = world_to_pixel(rdr, step, i1)
-    drawcircle(rdr, x, y, 2.5, true)
-    drawblock(rdr, step, i2, "Z")
-end
-
-function draw(rdr::Renderer, step, num_steps, gate::Measurement)
-    set_source_rgb(rdr.ctx, 0.5, 0.5, 0.5)
-    q = getMainQubitIndex(gate) + rdr.base_h / 4
-    plotline(rdr, step, q, num_steps + 1, q)
-    drawblock(rdr, step, getMainQubitIndex(gate), getCaption(gate))
-end
-
-# TODO:
-#function draw(rdr::Renderer, step, num_steps, gate::Toffoli)
-#function draw(rdr::Renderer, step, num_steps, gate::AbstractBlockGate)
-#function draw(rdr::Renderer, step, num_steps, gate::Oracle)
-
 function probBox(rdr::Renderer, x, y, prob)
     set_font_size(rdr.ctx, 11)
     select_font_face(rdr.ctx, "Sans", Cairo.FONT_SLANT_NORMAL, Cairo.FONT_WEIGHT_BOLD)
@@ -109,12 +70,12 @@ function probBox(rdr::Renderer, x, y, prob)
         plotrectangle(rdr, x - rdr.base_w / 2, y + rdr.base_h / 2, rdr.base_w, -h, true)
     end
     set_source_rgb(rdr.ctx, 1, 1, 1)
-    if pct < 1
+    if pct < 0.01
         lbl = "Off"
-    elseif pct > 99
+    elseif pct > 99.9
         lbl = "On"
     else
-        lbl = string(round(pct, digits = 2), "%")
+        lbl = string(round(pct, digits = 1), "%")
     end
     plottext(rdr, x, y, lbl)
     select_font_face(rdr.ctx, "Sans", Cairo.FONT_SLANT_NORMAL, Cairo.FONT_WEIGHT_NORMAL)
