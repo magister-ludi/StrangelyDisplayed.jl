@@ -23,7 +23,7 @@ function draw(rdr::Renderer, step, num_steps, gate::Cz)
     plotline(rdr, step, i1, step, i2)
     x, y = world_to_pixel(rdr, step, i1)
     drawcircle(rdr, x, y, 2.5, true)
-    drawblock(rdr, step, i2, "Z")
+    drawblock(rdr, step, i2, getCaption(gate))
 end
 
 function draw(rdr::Renderer, step, num_steps, gate::Measurement)
@@ -45,7 +45,6 @@ function draw(rdr::Renderer, step, num_steps, gate::ProbabilitiesGate)
 
     offsetY = 1 - rdr.base_h / 2
     deltaY = (nq - 1 + rdr.base_h) / nn
-    #println("n = ", nq, " and N = ", nn, ", dY = ", deltaY)
 
     for i = 1:nn
         startY = (i - 1) * deltaY + offsetY
